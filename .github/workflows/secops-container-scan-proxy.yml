@@ -1,0 +1,65 @@
+name: Proxy SecOps Container Scan
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: Artifact name used for the container scan report.
+        required: false
+        type: string
+        default: container-scan-report
+      fail_on_findings:
+        description: Fail when vulnerabilities are discovered.
+        required: false
+        type: boolean
+        default: true
+      ignore_unfixed:
+        description: Ignore unfixed vulnerabilities reported by the upstream workflow.
+        required: false
+        type: boolean
+        default: true
+      scan_target:
+        description: Filesystem path or image reference to scan.
+        required: false
+        type: string
+        default: .
+      scan_type:
+        description: Supported values are filesystem or image.
+        required: false
+        type: string
+        default: filesystem
+      severity:
+        description: Severities that should be considered blocking.
+        required: false
+        type: string
+        default: HIGH,CRITICAL
+      test_mode:
+        description: Run the upstream workflow in contract-test mode.
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      findings_count:
+        description: Number of vulnerabilities discovered by the upstream scan.
+        value: ${{ jobs.upstream.outputs.findings_count }}
+      result:
+        description: Overall workflow result from the upstream workflow.
+        value: ${{ jobs.upstream.outputs.result }}
+
+permissions:
+  contents: read
+
+jobs:
+  upstream:
+    permissions:
+      contents: read
+    uses: example-secops-org/secops-workflow-hub/.github/workflows/container-scan.yml@v1
+    with:
+      artifact_name: ${{ inputs.artifact_name }}
+      fail_on_findings: ${{ inputs.fail_on_findings }}
+      ignore_unfixed: ${{ inputs.ignore_unfixed }}
+      scan_target: ${{ inputs.scan_target }}
+      scan_type: ${{ inputs.scan_type }}
+      severity: ${{ inputs.severity }}
+      test_mode: ${{ inputs.test_mode }}
+    secrets: inherit

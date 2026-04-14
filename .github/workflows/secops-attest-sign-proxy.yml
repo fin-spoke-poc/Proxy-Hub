@@ -1,0 +1,70 @@
+name: Proxy SecOps Attest And Sign
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: Artifact name used for the attest and sign report.
+        required: false
+        type: string
+        default: attest-sign-report
+      coverage_pct:
+        description: Coverage percentage presented to the signing gate.
+        required: false
+        type: number
+        default: 0
+      coverage_threshold_pct:
+        description: Minimum coverage required before signing is allowed.
+        required: false
+        type: number
+        default: 60
+      enable_signing:
+        description: Perform keyless signing when true.
+        required: false
+        type: boolean
+        default: false
+      subject_digest:
+        description: OCI digest for the artifact in sha256 format.
+        required: true
+        type: string
+      subject_name:
+        description: OCI image reference or other subject name.
+        required: true
+        type: string
+      test_mode:
+        description: Run the upstream workflow in contract-test mode.
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      attestation_result:
+        description: Result of provenance attestation from the upstream workflow.
+        value: ${{ jobs.upstream.outputs.attestation_result }}
+      result:
+        description: Overall workflow result from the upstream workflow.
+        value: ${{ jobs.upstream.outputs.result }}
+      signature_result:
+        description: Result of the signing step from the upstream workflow.
+        value: ${{ jobs.upstream.outputs.signature_result }}
+
+permissions:
+  attestations: write
+  contents: read
+  id-token: write
+
+jobs:
+  upstream:
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+    uses: example-secops-org/secops-workflow-hub/.github/workflows/attest-sign.yml@v1
+    with:
+      artifact_name: ${{ inputs.artifact_name }}
+      coverage_pct: ${{ inputs.coverage_pct }}
+      coverage_threshold_pct: ${{ inputs.coverage_threshold_pct }}
+      enable_signing: ${{ inputs.enable_signing }}
+      subject_digest: ${{ inputs.subject_digest }}
+      subject_name: ${{ inputs.subject_name }}
+      test_mode: ${{ inputs.test_mode }}
+    secrets: inherit

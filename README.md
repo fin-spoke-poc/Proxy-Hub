@@ -82,26 +82,27 @@ Do not put the following here unless there is a very specific governance reason:
 
 If the real implementation belongs to SecOps, Platform, or a BU shared-services hub, it should stay there.
 
-## Recommended Repository Shape
+## Current Repository Shape
 
-This repo is currently a stub. The intended structure is:
+The repository now contains the first working proxy workflow scaffold:
 
 ```text
 Proxy-Hub/
 ├── .github/
 │   └── workflows/
-│       ├── secops-attest-proxy.yml
-│       ├── secops-scan-proxy.yml
-│       ├── platform-lint-proxy.yml
-│       ├── platform-policy-proxy.yml
-│       └── proxy-validation.yml
+│       ├── secops-secret-scan-proxy.yml
+│       ├── secops-container-scan-proxy.yml
+│       ├── secops-attest-sign-proxy.yml
+│       ├── validate-proxy-workflows.yml
+│       └── release.yml
 ├── manifests/
 │   └── workflow-map.yaml
 ├── docs/
-│   ├── promotion-model.md
-│   └── break-glass.md
+│   └── promotion-model.md
 └── README.md
 ```
+
+For this POC, only the SecOps proxy workflows are implemented because the upstream Security hub exists in the workspace. Platform proxy workflows can be added later when the Platform workflow hub is available.
 
 ## Proxy Workflow Pattern
 
@@ -132,7 +133,7 @@ on:
 
 jobs:
 	attest_and_sign:
-		uses: upstream-secops-org/security-hub/.github/workflows/attest-sign.yml@v1.2.3
+		uses: example-secops-org/secops-workflow-hub/.github/workflows/attest-sign.yml@v1
 		permissions:
 			id-token: write
 			contents: read
@@ -145,6 +146,16 @@ jobs:
 
 The wrapper must stay thin. If more than a small amount of control logic is accumulating here, ownership boundaries are drifting.
 
+## Current Workflow Catalogue
+
+The repository now includes the following workflows:
+
+- `secops-secret-scan-proxy.yml`: thin wrapper around the upstream SecOps secret scan workflow.
+- `secops-container-scan-proxy.yml`: thin wrapper around the upstream SecOps container scan workflow.
+- `secops-attest-sign-proxy.yml`: thin wrapper around the upstream SecOps attestation and signing workflow.
+- `validate-proxy-workflows.yml`: pull request workflow that lints the proxy workflows and validates workflow-map plus version pinning before merge to `main`.
+- `release.yml`: manual release workflow that creates immutable semantic version tags and updates the floating major tag.
+
 ## Workflow Mapping And Versioning
 
 Proxy-Hub should provide a clear mapping between local proxy versions and upstream workflow versions.
@@ -153,29 +164,29 @@ Suggested mapping file:
 
 ```yaml
 workflows:
-	secops-attest-proxy:
-		owner: SecOps
+	secops-attest-sign-proxy:
+		owner: Proxy-Hub
 		proxy_ref: v1
-		upstream_repo: upstream-secops-org/security-hub
+		upstream_repo: example-secops-org/secops-workflow-hub
 		upstream_workflow: .github/workflows/attest-sign.yml
-		upstream_ref: v1.2.3
-	platform-lint-proxy:
-		owner: Platform
-		proxy_ref: v1
-		upstream_repo: upstream-platform-org/platform-hub
-		upstream_workflow: .github/workflows/lint.yml
-		upstream_ref: v1.4.0
+		upstream_ref: v1
 ```
+
+The actual mapping is now maintained in `manifests/workflow-map.yaml`.
+
+Before activation in GitHub, replace `example-secops-org/secops-workflow-hub` with the real upstream SecOps repository location.
 
 Recommended release model:
 
 1. Upstream team releases or approves a new workflow version.
 2. Proxy-Hub updates the pinned upstream reference in a PR.
-3. Proxy validation runs against canary repositories or evaluate-mode rulesets.
+3. `validate-proxy-workflows.yml` runs before merge to confirm the proxy files stay pinned to versioned upstream refs and remain in sync with `workflow-map.yaml`.
 4. After validation, Proxy-Hub promotes a stable tag such as `v1`.
 5. Project rulesets continue referencing the stable proxy tag, not `main`.
 
 This follows the standardization guidance in the project docs and limits blast radius.
+
+See `docs/promotion-model.md` for the promotion details.
 
 ## Ruleset Usage Model
 
@@ -244,6 +255,18 @@ To keep this repo maintainable, follow these rules:
 - validate new proxy refs in canary or evaluate mode before broad rollout
 - rollback by reverting the pinned upstream ref or restoring the prior proxy tag
 
+## Workflow Validation Before Merge
+
+This repo now includes a dedicated validation workflow for branch protection.
+
+`validate-proxy-workflows.yml` does three things before merge to `main`:
+
+- runs `actionlint` against the proxy workflow definitions
+- verifies that each proxy workflow is listed in `manifests/workflow-map.yaml`
+- verifies that proxy `uses:` lines are pinned to versioned upstream refs such as `@v1`, not branches such as `@main`
+
+That gives the project a safe merge gate even before the real upstream repo coordinates are finalized.
+
 ## Success Criteria For This POC
 
 Proxy-Hub is successful when the project can demonstrate all of the following:
@@ -254,6 +277,7 @@ Proxy-Hub is successful when the project can demonstrate all of the following:
 - proxy versions can be promoted and rolled back independently of app repos
 - audit records clearly show proxy ref, upstream ref, and resulting evidence
 - attestation and signing outcomes remain visible to downstream deployment controls
+- wrapper workflows remain pinned to released upstream versions and are validated before merge
 
 ## Alignment To Project Docs
 
@@ -266,12 +290,11 @@ This repo supports the patterns documented in:
 - [Unified GitOps](../Docs/0004-unified-gitops.md)
 - [Quality thresholds](../Docs/0006-qualitygates/thresholds.md)
 
-## Recommended Next Step
+## Next Steps
 
-The first useful implementation of this repo should be very small:
+The first useful implementation of this repo is now in place. The next useful steps are:
 
-1. Add one SecOps attestation proxy workflow.
-2. Add one Platform lint proxy workflow.
-3. Add `manifests/workflow-map.yaml` to track upstream mappings.
-4. Protect the repo and tag the first stable proxy release as `v1`.
-5. Point the POC rulesets for Container-App at the proxy workflows in this repo.
+1. Replace `example-secops-org/secops-workflow-hub` with the actual upstream SecOps repo location.
+2. Run `release.yml` to publish the first immutable Proxy-Hub release and floating major tag.
+3. Point the POC rulesets for Container-App at the released proxy workflows in this repo.
+4. Add Platform proxy workflows once the upstream Platform workflow hub exists.

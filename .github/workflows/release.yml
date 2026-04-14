@@ -1,0 +1,95 @@
+name: Release Proxy Hub
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Mark the release as a prerelease.
+        required: true
+        type: boolean
+        default: false
+      target_sha:
+        description: Commit SHA to release. Defaults to the current workflow SHA.
+        required: false
+        type: string
+      version:
+        description: Immutable semantic version tag in the form vX.Y.Z.
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Validate release inputs
+      id: validate
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="${{ inputs.version }}"
+        target_sha="${{ inputs.target_sha }}"
+
+        if [[ -z "$target_sha" ]]; then
+          target_sha="${GITHUB_SHA}"
+        fi
+
+        if [[ ! "$version" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+          echo "Version must match the pattern vX.Y.Z."
+          exit 1
+        fi
+
+        major_tag="v${BASH_REMATCH[1]}"
+
+        git fetch --tags origin
+
+        if git rev-parse "$version" >/dev/null 2>&1; then
+          echo "Tag $version already exists."
+          exit 1
+        fi
+
+        if ! git rev-parse "$target_sha" >/dev/null 2>&1; then
+          echo "Commit $target_sha could not be resolved."
+          exit 1
+        fi
+
+        echo "major_tag=$major_tag" >> "$GITHUB_OUTPUT"
+        echo "target_sha=$target_sha" >> "$GITHUB_OUTPUT"
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+    - name: Create immutable release tag
+      shell: bash
+      run: |
+        git tag -a "${{ steps.validate.outputs.version }}" "${{ steps.validate.outputs.target_sha }}" -m "Release ${{ steps.validate.outputs.version }}"
+        git push origin "refs/tags/${{ steps.validate.outputs.version }}"
+
+    - name: Update floating major tag
+      shell: bash
+      run: |
+        git tag -fa "${{ steps.validate.outputs.major_tag }}" "${{ steps.validate.outputs.target_sha }}" -m "Update ${{ steps.validate.outputs.major_tag }} -> ${{ steps.validate.outputs.version }}"
+        git push origin "refs/tags/${{ steps.validate.outputs.major_tag }}" --force
+
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        prerelease_flag=""
+
+        if [[ "${{ inputs.prerelease }}" == "true" ]]; then
+          prerelease_flag="--prerelease"
+        fi
+
+        gh release create "${{ steps.validate.outputs.version }}" \
+          --generate-notes \
+          --target "${{ steps.validate.outputs.target_sha }}" \
+          --title "${{ steps.validate.outputs.version }}" \
+          ${prerelease_flag}

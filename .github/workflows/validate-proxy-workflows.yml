@@ -1,0 +1,60 @@
+name: Validate Proxy Workflows
+
+on:
+  pull_request:
+    branches:
+    - main
+  workflow_dispatch:
+
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Lint GitHub workflows
+      uses: rhysd/actionlint@v1
+
+  validate_proxy_contracts:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Validate proxy workflow map and pinned refs
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        manifest="manifests/workflow-map.yaml"
+        workflows=(
+          ".github/workflows/secops-secret-scan-proxy.yml"
+          ".github/workflows/secops-container-scan-proxy.yml"
+          ".github/workflows/secops-attest-sign-proxy.yml"
+        )
+
+        test -f "$manifest"
+
+        for workflow in "${workflows[@]}"; do
+          test -f "$workflow"
+          grep -Eq 'uses: .+/.github/workflows/.+@v[0-9]+' "$workflow"
+          ! grep -Eq '@main|@master' "$workflow"
+          grep -Fq "file: $workflow" "$manifest"
+        done
+
+        grep -Fq 'upstream_repo: example-secops-org/secops-workflow-hub' "$manifest"
+        grep -Fq 'upstream_ref: v1' "$manifest"
+
+    - name: Verify release workflow exists
+      shell: bash
+      run: |
+        set -euo pipefail
+        test -f .github/workflows/release.yml
+        grep -Fq 'Version must match the pattern vX.Y.Z.' .github/workflows/release.yml
