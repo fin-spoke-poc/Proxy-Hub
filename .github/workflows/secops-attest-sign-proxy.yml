@@ -58,7 +58,7 @@ jobs:
       attestations: write
       contents: read
       id-token: write
-    uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@v1
+    uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
       coverage_pct: ${{ inputs.coverage_pct }}

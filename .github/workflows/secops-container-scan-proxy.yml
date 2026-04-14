@@ -53,7 +53,7 @@ jobs:
   upstream:
     permissions:
       contents: read
-    uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@v1
+    uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
       fail_on_findings: ${{ inputs.fail_on_findings }}
