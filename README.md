@@ -133,7 +133,7 @@ on:
 
 jobs:
 	attest_and_sign:
-		uses: example-secops-org/secops-workflow-hub/.github/workflows/attest-sign.yml@v1
+		uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@v1
 		permissions:
 			id-token: write
 			contents: read
@@ -167,14 +167,14 @@ workflows:
 	secops-attest-sign-proxy:
 		owner: Proxy-Hub
 		proxy_ref: v1
-		upstream_repo: example-secops-org/secops-workflow-hub
+		upstream_repo: fin-hub-poc/SecOps
 		upstream_workflow: .github/workflows/attest-sign.yml
 		upstream_ref: v1
 ```
 
 The actual mapping is now maintained in `manifests/workflow-map.yaml`.
 
-Before activation in GitHub, replace `example-secops-org/secops-workflow-hub` with the real upstream SecOps repository location.
+The proxy workflows are currently mapped to `fin-hub-poc/SecOps` as the upstream SecOps workflow hub.
 
 Recommended release model:
 
@@ -294,7 +294,7 @@ This repo supports the patterns documented in:
 
 The first useful implementation of this repo is now in place. The next useful steps are:
 
-1. Replace `example-secops-org/secops-workflow-hub` with the actual upstream SecOps repo location.
+1. Confirm `fin-hub-poc/SecOps` remains the intended upstream SecOps repo location.
 2. Run `release.yml` to publish the first immutable Proxy-Hub release and floating major tag.
 3. Point the POC rulesets for Container-App at the released proxy workflows in this repo.
 4. Add Platform proxy workflows once the upstream Platform workflow hub exists.

@@ -1,4 +1,4 @@
-# Replace example-secops-org/secops-workflow-hub with the actual upstream SecOps repo before activation.
+# Upstream SecOps workflow hub repository.
 versioning:
   immutable_tags:
     pattern: vX.Y.Z
@@ -12,7 +12,7 @@ workflows:
   file: .github/workflows/secops-secret-scan-proxy.yml
   owner: Proxy-Hub
   proxy_ref: v1
-  upstream_repo: example-secops-org/secops-workflow-hub
+  upstream_repo: fin-hub-poc/SecOps
   upstream_workflow: .github/workflows/secret-scan.yml
   upstream_ref: v1
   contract:
@@ -23,7 +23,7 @@ workflows:
   file: .github/workflows/secops-container-scan-proxy.yml
   owner: Proxy-Hub
   proxy_ref: v1
-  upstream_repo: example-secops-org/secops-workflow-hub
+  upstream_repo: fin-hub-poc/SecOps
   upstream_workflow: .github/workflows/container-scan.yml
   upstream_ref: v1
   contract:
@@ -34,7 +34,7 @@ workflows:
   file: .github/workflows/secops-attest-sign-proxy.yml
   owner: Proxy-Hub
   proxy_ref: v1
-  upstream_repo: example-secops-org/secops-workflow-hub
+  upstream_repo: fin-hub-poc/SecOps
   upstream_workflow: .github/workflows/attest-sign.yml
   upstream_ref: v1
   contract:

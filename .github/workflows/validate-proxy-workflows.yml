@@ -49,7 +49,7 @@ jobs:
           grep -Fq "file: $workflow" "$manifest"
         done
 
-        grep -Fq 'upstream_repo: example-secops-org/secops-workflow-hub' "$manifest"
+        grep -Fq 'upstream_repo: fin-hub-poc/SecOps' "$manifest"
         grep -Fq 'upstream_ref: v1' "$manifest"
 
     - name: Verify release workflow exists

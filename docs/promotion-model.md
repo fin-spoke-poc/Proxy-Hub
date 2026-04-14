@@ -16,7 +16,7 @@ Proxy-Hub does not own the security logic. It owns the project-local attachment 
 
 ## Activation Checklist
 
-- Replace `example-secops-org/secops-workflow-hub` with the actual upstream repo location.
+- Confirm `fin-hub-poc/SecOps` is the correct upstream repo location.
 - Confirm the upstream repo exposes the referenced workflow files and release tags.
 - Confirm the Proxy-Hub workflow map matches the wrapper workflow `uses:` lines.
 
