@@ -33,11 +33,6 @@ on:
         required: false
         type: string
         default: HIGH,CRITICAL
-      test_mode:
-        description: Run the upstream workflow in contract-test mode.
-        required: false
-        type: boolean
-        default: false
     outputs:
       findings_count:
         description: Number of vulnerabilities discovered by the upstream scan.
@@ -53,6 +48,7 @@ jobs:
   upstream:
     permissions:
       contents: read
+      packages: read
     uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
@@ -61,5 +57,4 @@ jobs:
       scan_target: ${{ inputs.scan_target }}
       scan_type: ${{ inputs.scan_type }}
       severity: ${{ inputs.severity }}
-      test_mode: ${{ inputs.test_mode }}
     secrets: inherit

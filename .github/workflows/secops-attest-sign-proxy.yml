@@ -31,11 +31,6 @@ on:
         description: OCI image reference or other subject name.
         required: true
         type: string
-      test_mode:
-        description: Run the upstream workflow in contract-test mode.
-        required: false
-        type: boolean
-        default: false
     outputs:
       attestation_result:
         description: Result of provenance attestation from the upstream workflow.
@@ -66,5 +61,4 @@ jobs:
       enable_signing: ${{ inputs.enable_signing }}
       subject_digest: ${{ inputs.subject_digest }}
       subject_name: ${{ inputs.subject_name }}
-      test_mode: ${{ inputs.test_mode }}
     secrets: inherit
