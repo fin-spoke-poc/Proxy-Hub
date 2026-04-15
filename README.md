@@ -135,9 +135,11 @@ jobs:
 	attest_and_sign:
 		uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@v1
 		permissions:
+			artifact-metadata: write
 			id-token: write
 			contents: read
 			attestations: write
+			packages: write
 		with:
 			image_name: ${{ inputs.image_name }}
 			image_digest: ${{ inputs.image_digest }}

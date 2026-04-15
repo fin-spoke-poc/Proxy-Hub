@@ -43,16 +43,20 @@ on:
         value: ${{ jobs.upstream.outputs.signature_result }}
 
 permissions:
+  artifact-metadata: write
   attestations: write
   contents: read
   id-token: write
+  packages: write
 
 jobs:
   upstream:
     permissions:
+      artifact-metadata: write
       attestations: write
       contents: read
       id-token: write
+      packages: write
     uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
