@@ -2,7 +2,7 @@
 
 This repository is the local enforcement layer for GitHub Org Rulesets when the authoritative workflow logic is owned in another GitHub org.
 
-For this POC, Proxy-Hub exists so project repositories such as Container-App can be governed by required workflows without copying SecOps or Platform logic directly into every application repository.
+For this MVP, Proxy-Hub exists so project repositories such as Container-App can be governed by required workflows without copying SecOps or Platform logic directly into every application repository.
 
 ## Purpose
 
@@ -18,7 +18,7 @@ This allows the project to enforce centrally managed controls while preserving c
 
 ## Why This Repo Exists
 
-The governance docs define a hub-and-spoke model with Security-owned, Platform-owned, and BU-owned workflows. In practice, this POC needs a local repository that can act as the ruleset attachment point for workflows whose source of truth lives elsewhere.
+The governance docs define a hub-and-spoke model with Security-owned, Platform-owned, and BU-owned workflows. In practice, this MVP needs a local repository that can act as the ruleset attachment point for workflows whose source of truth lives elsewhere.
 
 Proxy-Hub is that attachment point.
 
@@ -102,7 +102,7 @@ Proxy-Hub/
 └── README.md
 ```
 
-For this POC, only the SecOps proxy workflows are implemented because the upstream Security hub exists in the workspace. Platform proxy workflows can be added later when the Platform workflow hub is available.
+For this MVP, only the SecOps proxy workflows are implemented because the upstream Security hub exists in the workspace. Platform proxy workflows can be added later when the Platform workflow hub is available.
 
 ## Proxy Workflow Pattern
 
@@ -259,7 +259,7 @@ To keep this repo maintainable, follow these rules:
 
 ## Workflow Validation Before Merge
 
-This repo now includes a dedicated validation workflow for branch protection.
+This repo includes a dedicated validation workflow for branch protection.
 
 `validate-proxy-workflows.yml` does three things before merge to `main`:
 
@@ -269,7 +269,7 @@ This repo now includes a dedicated validation workflow for branch protection.
 
 That gives the project a safe merge gate even before the real upstream repo coordinates are finalized.
 
-## Success Criteria For This POC
+## Success Criteria For This MVP
 
 Proxy-Hub is successful when the project can demonstrate all of the following:
 
@@ -298,5 +298,5 @@ The first useful implementation of this repo is now in place. The next useful st
 
 1. Confirm `fin-hub-poc/SecOps` remains the intended upstream SecOps repo location.
 2. Run `release.yml` to publish the first immutable Proxy-Hub release and floating major tag.
-3. Point the POC rulesets for Container-App at the released proxy workflows in this repo.
+3. Point the MVP rulesets for Container-App at the released proxy workflows in this repo.
 4. Add Platform proxy workflows once the upstream Platform workflow hub exists.
