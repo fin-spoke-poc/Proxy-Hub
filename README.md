@@ -36,10 +36,10 @@ High-level flow:
 
 ```text
 Container-App PR or merge
-	-> GitHub Org Ruleset
-	-> required workflow in Proxy-Hub
-	-> pinned reusable workflow in upstream org repo
-	-> status and evidence returned to Container-App
+ -> GitHub Org Ruleset
+ -> required workflow in Proxy-Hub
+ -> pinned reusable workflow in upstream org repo
+ -> status and evidence returned to Container-App
 ```
 
 This preserves upstream ownership while still giving the project a stable, governable local control plane.
@@ -122,29 +122,29 @@ Example pattern:
 name: SecOps Attestation Proxy
 
 on:
-	workflow_call:
-		inputs:
-			subject_name:
-				required: true
-				type: string
-			subject_digest:
-				required: true
-				type: string
+ workflow_call:
+  inputs:
+   subject_name:
+    required: true
+    type: string
+   subject_digest:
+    required: true
+    type: string
 
 jobs:
-	attest_and_sign:
-		uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@main
-		permissions:
-			attestations: write
-			contents: read
-			id-token: write
-			packages: write
-		with:
-			subject_name: ${{ inputs.subject_name }}
-			subject_digest: ${{ inputs.subject_digest }}
-			registry_provider: ecr
-			aws_role_to_assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-		secrets: inherit
+ attest_and_sign:
+  uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@main
+  permissions:
+   attestations: write
+   contents: read
+   id-token: write
+   packages: write
+  with:
+   subject_name: ${{ inputs.subject_name }}
+   subject_digest: ${{ inputs.subject_digest }}
+   registry_provider: ecr
+   aws_role_to_assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+  secrets: inherit
 ```
 
 The wrapper must stay thin. If more than a small amount of control logic is accumulating here, ownership boundaries are drifting.
@@ -177,12 +177,12 @@ Suggested mapping file:
 
 ```yaml
 workflows:
-	secops-attest-sign-proxy:
-		owner: Proxy-Hub
-		proxy_ref: main
-		upstream_repo: fin-hub-poc/SecOps
-		upstream_workflow: .github/workflows/attest-sign.yml
-		upstream_ref: main
+ secops-attest-sign-proxy:
+  owner: Proxy-Hub
+  proxy_ref: main
+  upstream_repo: fin-hub-poc/SecOps
+  upstream_workflow: .github/workflows/attest-sign.yml
+  upstream_ref: main
 ```
 
 The actual mapping is now maintained in `manifests/workflow-map.yaml`.

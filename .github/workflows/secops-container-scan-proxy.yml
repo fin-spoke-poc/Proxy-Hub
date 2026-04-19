@@ -97,7 +97,7 @@ jobs:
       contents: read
       id-token: write
       packages: read
-    uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@main
+    uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@feat/multi-attest-targets
     with:
       artifact_name: ${{ inputs.artifact_name }}
       aws_region: ${{ inputs.aws_region }}
