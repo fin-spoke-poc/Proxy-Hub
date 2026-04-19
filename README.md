@@ -124,39 +124,50 @@ name: SecOps Attestation Proxy
 on:
 	workflow_call:
 		inputs:
-			image_name:
+			subject_name:
 				required: true
 				type: string
-			image_digest:
+			subject_digest:
 				required: true
 				type: string
 
 jobs:
 	attest_and_sign:
-		uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@v1
+		uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@main
 		permissions:
-			artifact-metadata: write
-			id-token: write
-			contents: read
 			attestations: write
+			contents: read
+			id-token: write
 			packages: write
 		with:
-			image_name: ${{ inputs.image_name }}
-			image_digest: ${{ inputs.image_digest }}
+			subject_name: ${{ inputs.subject_name }}
+			subject_digest: ${{ inputs.subject_digest }}
+			registry_provider: ecr
+			aws_role_to_assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 		secrets: inherit
 ```
 
 The wrapper must stay thin. If more than a small amount of control logic is accumulating here, ownership boundaries are drifting.
+
+Once SecOps publishes the first governed `v1` tag, replace `@main` with `@v1` and then publish the first Proxy-Hub release so rulesets can move to the floating major tag.
 
 ## Current Workflow Catalogue
 
 The repository now includes the following workflows:
 
 - `secops-secret-scan-proxy.yml`: thin wrapper around the upstream SecOps secret scan workflow.
-- `secops-container-scan-proxy.yml`: thin wrapper around the upstream SecOps container scan workflow.
-- `secops-attest-sign-proxy.yml`: thin wrapper around the upstream SecOps attestation and signing workflow.
+- `secops-container-scan-proxy.yml`: thin wrapper around the upstream SecOps container scan workflow, including optional pass-through inputs for GHCR, ACR, ECR, and GAR authentication.
+- `secops-attest-sign-proxy.yml`: thin wrapper around the upstream SecOps attestation and signing workflow, including optional pass-through inputs for GHCR, ACR, ECR, and GAR authentication.
 - `validate-proxy-workflows.yml`: pull request workflow that lints the proxy workflows and validates workflow-map plus version pinning before merge to `main`.
 - `release.yml`: manual release workflow that creates immutable semantic version tags and updates the floating major tag.
+
+## Stable Consumer Surface
+
+Proxy-Hub keeps the current public proxy names stable even as SecOps evolves internally.
+
+- Application teams continue calling the same proxy workflow names.
+- Registry-specific behavior is selected through optional inputs like `registry_provider`, `registry_server`, and cloud OIDC identifiers.
+- SecOps can split internal implementation into separate `attest.yml` and `sign.yml` workflows without forcing downstream repos to change their job graph.
 
 ## Workflow Mapping And Versioning
 
@@ -168,10 +179,10 @@ Suggested mapping file:
 workflows:
 	secops-attest-sign-proxy:
 		owner: Proxy-Hub
-		proxy_ref: v1
+		proxy_ref: main
 		upstream_repo: fin-hub-poc/SecOps
 		upstream_workflow: .github/workflows/attest-sign.yml
-		upstream_ref: v1
+		upstream_ref: main
 ```
 
 The actual mapping is now maintained in `manifests/workflow-map.yaml`.
@@ -180,11 +191,12 @@ The proxy workflows are currently mapped to `fin-hub-poc/SecOps` as the upstream
 
 Recommended release model:
 
-1. Upstream team releases or approves a new workflow version.
-2. Proxy-Hub updates the pinned upstream reference in a PR.
-3. `validate-proxy-workflows.yml` runs before merge to confirm the proxy files stay pinned to versioned upstream refs and remain in sync with `workflow-map.yaml`.
-4. After validation, Proxy-Hub promotes a stable tag such as `v1`.
-5. Project rulesets continue referencing the stable proxy tag, not `main`.
+1. During bootstrap, Proxy-Hub tracks `@main` and keeps `workflow-map.yaml` aligned with that reality.
+2. Upstream team releases or approves a new workflow version such as `v1`.
+3. Proxy-Hub updates the pinned upstream reference in a PR.
+4. `validate-proxy-workflows.yml` runs before merge to confirm the proxy files and `workflow-map.yaml` stay aligned.
+5. After validation, Proxy-Hub promotes a stable tag such as `v1`.
+6. Project rulesets continue referencing the stable proxy tag, not `main`.
 
 This follows the standardization guidance in the project docs and limits blast radius.
 

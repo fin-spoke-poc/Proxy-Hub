@@ -34,23 +34,42 @@ jobs:
         set -euo pipefail
 
         manifest="manifests/workflow-map.yaml"
-        workflows=(
-          ".github/workflows/secops-secret-scan-proxy.yml"
-          ".github/workflows/secops-container-scan-proxy.yml"
-          ".github/workflows/secops-attest-sign-proxy.yml"
-        )
+        workflows=(.github/workflows/*-proxy.yml)
 
         test -f "$manifest"
 
         for workflow in "${workflows[@]}"; do
           test -f "$workflow"
-          grep -Eq 'uses: .+/.github/workflows/.+@v[0-9]+' "$workflow"
-          ! grep -Eq '@main|@master' "$workflow"
           grep -Fq "file: $workflow" "$manifest"
+
+          uses_line="$(grep -E '^[[:space:]]+uses: .+/.github/workflows/.+@[^[:space:]]+$' "$workflow" | head -n 1)"
+          test -n "$uses_line"
+
+          uses_ref="${uses_line##*@}"
+          manifest_ref="$(awk -v file="$workflow" '
+            $1 == "file:" && $2 == file { matched = 1; next }
+            matched && $1 == "upstream_ref:" { print $2; exit }
+          ' "$manifest")"
+
+          test -n "$manifest_ref"
+
+          if [[ ! "$uses_ref" =~ ^(main|v[0-9]+)$ ]]; then
+            echo "Proxy workflow $workflow must reference @main during bootstrap or a floating major tag like @v1."
+            exit 1
+          fi
+
+          if [[ "$uses_ref" == "master" ]]; then
+            echo "Proxy workflow $workflow must not reference @master."
+            exit 1
+          fi
+
+          if [[ "$uses_ref" != "$manifest_ref" ]]; then
+            echo "Proxy workflow $workflow uses @$uses_ref but workflow-map.yaml records @$manifest_ref."
+            exit 1
+          fi
         done
 
         grep -Fq 'upstream_repo: fin-hub-poc/SecOps' "$manifest"
-        grep -Fq 'upstream_ref: v1' "$manifest"
 
     - name: Verify release workflow exists
       shell: bash
