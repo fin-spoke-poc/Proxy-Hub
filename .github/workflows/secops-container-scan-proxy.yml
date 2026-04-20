@@ -86,17 +86,8 @@ on:
         description: Overall workflow result from the upstream workflow.
         value: ${{ jobs.upstream.outputs.result }}
 
-permissions:
-  contents: read
-  id-token: write
-  packages: read
-
 jobs:
   upstream:
-    permissions:
-      contents: read
-      id-token: write
-      packages: read
     uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@feat/multi-attest-targets
     with:
       artifact_name: ${{ inputs.artifact_name }}
