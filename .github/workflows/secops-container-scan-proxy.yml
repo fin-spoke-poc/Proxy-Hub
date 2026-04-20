@@ -93,13 +93,11 @@ permissions:
 
 jobs:
   upstream:
+    name: "SecOps Org - Container Scan"
     permissions:
       contents: read
       id-token: write
       packages: read
-jobs:
-  upstream:
-    name: "SecOps Org - Container Scan"
     uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
