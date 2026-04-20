@@ -1,4 +1,4 @@
-name: Proxy SecOps Attest And Sign
+name: SecOps Local Org Proxy Attest/Sign
 
 on:
   workflow_call:
