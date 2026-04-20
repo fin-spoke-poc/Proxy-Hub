@@ -8,49 +8,76 @@ versioning:
     example: v1
 
 workflows:
-- name: secops-secret-scan-proxy
-  file: .github/workflows/secops-secret-scan-proxy.yml
-  owner: Proxy-Hub
-  proxy_ref: v1
-  upstream_repo: fin-hub-poc/SecOps
-  upstream_workflow: .github/workflows/secret-scan.yml
-  upstream_ref: v1
-  contract:
-    outputs:
-    - findings_count
-    - result
-- name: secops-container-scan-proxy
-  file: .github/workflows/secops-container-scan-proxy.yml
-  owner: Proxy-Hub
-  proxy_ref: v1
-  upstream_repo: fin-hub-poc/SecOps
-  upstream_workflow: .github/workflows/container-scan.yml
-  upstream_ref: v1
-  contract:
-    outputs:
-    - findings_count
-    - result
-- name: secops-attest-sign-proxy
-  file: .github/workflows/secops-attest-sign-proxy.yml
-  owner: Proxy-Hub
-  proxy_ref: v1
-  upstream_repo: fin-hub-poc/SecOps
-  upstream_workflow: .github/workflows/attest-sign.yml
-  upstream_ref: v1
-  contract:
-    outputs:
-    - attestation_result
-    - result
-    - signature_result
-- name: validate-proxy-workflows
-  file: .github/workflows/validate-proxy-workflows.yml
-  owner: Proxy-Hub
-  release_channel: branch-protection
-  contract:
-    purpose: Validate proxy workflow syntax, mapping, and version pinning before merge to main.
-- name: release
-  file: .github/workflows/release.yml
-  owner: Proxy-Hub
-  release_channel: manual-dispatch
-  contract:
-    purpose: Create immutable semantic releases and update the floating major tag.
+  - name: secops-secret-scan-proxy
+    file: .github/workflows/secops-secret-scan-proxy.yml
+    owner: Proxy-Hub
+    proxy_ref: main
+    upstream_repo: fin-hub-poc/SecOps
+    upstream_workflow: .github/workflows/secret-scan.yml
+    upstream_ref: main
+    contract:
+      outputs:
+        - findings_count
+        - result
+  - name: secops-container-scan-proxy
+    file: .github/workflows/secops-container-scan-proxy.yml
+    owner: Proxy-Hub
+    proxy_ref: main
+    upstream_repo: fin-hub-poc/SecOps
+    upstream_workflow: .github/workflows/container-scan.yml
+    upstream_ref: main
+    contract:
+      inputs:
+        - scan_target
+        - scan_type
+        - registry_provider
+        - registry_server
+        - aws_role_to_assume
+        - aws_region
+        - azure_client_id
+        - azure_subscription_id
+        - azure_tenant_id
+        - gcp_workload_identity_provider
+        - gcp_service_account
+      outputs:
+        - findings_count
+        - result
+  - name: secops-attest-sign-proxy
+    file: .github/workflows/secops-attest-sign-proxy.yml
+    owner: Proxy-Hub
+    proxy_ref: main
+    upstream_repo: fin-hub-poc/SecOps
+    upstream_workflow: .github/workflows/attest-sign.yml
+    upstream_ref: main
+    contract:
+      inputs:
+        - coverage_pct
+        - coverage_threshold_pct
+        - enable_signing
+        - subject_digest
+        - subject_name
+        - registry_provider
+        - registry_server
+        - aws_role_to_assume
+        - aws_region
+        - azure_client_id
+        - azure_subscription_id
+        - azure_tenant_id
+        - gcp_workload_identity_provider
+        - gcp_service_account
+      outputs:
+        - attestation_result
+        - result
+        - signature_result
+  - name: validate-proxy-workflows
+    file: .github/workflows/validate-proxy-workflows.yml
+    owner: Proxy-Hub
+    release_channel: branch-protection
+    contract:
+      purpose: Validate proxy workflow syntax, mapping, and version pinning before merge to main.
+  - name: release
+    file: .github/workflows/release.yml
+    owner: Proxy-Hub
+    release_channel: manual-dispatch
+    contract:
+      purpose: Create immutable semantic releases and update the floating major tag.
