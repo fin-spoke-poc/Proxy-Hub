@@ -1,4 +1,4 @@
-name: Proxy SecOps Attest And Sign
+name: SecOps Local Org Proxy Attest/Sign
 
 on:
   workflow_call:
@@ -8,6 +8,31 @@ on:
         required: false
         type: string
         default: attest-sign-report
+      aws_region:
+        description: AWS region used for Amazon ECR authentication when it cannot be inferred from the image reference.
+        required: false
+        type: string
+        default: ''
+      aws_role_to_assume:
+        description: AWS IAM role ARN used for Amazon ECR authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
+      azure_client_id:
+        description: Azure client ID used for Azure Container Registry authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
+      azure_subscription_id:
+        description: Azure subscription ID used for Azure Container Registry authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
+      azure_tenant_id:
+        description: Azure tenant ID used for Azure Container Registry authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
       coverage_pct:
         description: Coverage percentage presented to the signing gate.
         required: false
@@ -23,6 +48,26 @@ on:
         required: false
         type: boolean
         default: false
+      gcp_service_account:
+        description: Google service account email used for Google Artifact Registry authentication via workload identity federation.
+        required: false
+        type: string
+        default: ''
+      gcp_workload_identity_provider:
+        description: Google workload identity provider used for Google Artifact Registry authentication.
+        required: false
+        type: string
+        default: ''
+      registry_provider:
+        description: Container registry provider. Supported values are auto, ghcr, acr, ecr, or gar.
+        required: false
+        type: string
+        default: auto
+      registry_server:
+        description: Container registry host. When omitted, the host is inferred from the subject name.
+        required: false
+        type: string
+        default: ''
       subject_digest:
         description: OCI digest for the artifact in sha256 format.
         required: true
@@ -51,6 +96,7 @@ permissions:
 
 jobs:
   upstream:
+    name: "SecOps Org - Attest/Sign"
     permissions:
       artifact-metadata: write
       attestations: write
@@ -60,9 +106,18 @@ jobs:
     uses: fin-hub-poc/SecOps/.github/workflows/attest-sign.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
+      aws_region: ${{ inputs.aws_region }}
+      aws_role_to_assume: ${{ inputs.aws_role_to_assume }}
+      azure_client_id: ${{ inputs.azure_client_id }}
+      azure_subscription_id: ${{ inputs.azure_subscription_id }}
+      azure_tenant_id: ${{ inputs.azure_tenant_id }}
       coverage_pct: ${{ inputs.coverage_pct }}
       coverage_threshold_pct: ${{ inputs.coverage_threshold_pct }}
       enable_signing: ${{ inputs.enable_signing }}
+      gcp_service_account: ${{ inputs.gcp_service_account }}
+      gcp_workload_identity_provider: ${{ inputs.gcp_workload_identity_provider }}
+      registry_provider: ${{ inputs.registry_provider }}
+      registry_server: ${{ inputs.registry_server }}
       subject_digest: ${{ inputs.subject_digest }}
       subject_name: ${{ inputs.subject_name }}
     secrets: inherit

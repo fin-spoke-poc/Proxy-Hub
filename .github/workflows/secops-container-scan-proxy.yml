@@ -8,16 +8,61 @@ on:
         required: false
         type: string
         default: container-scan-report
+      aws_region:
+        description: AWS region used for Amazon ECR authentication when it cannot be inferred from the image reference.
+        required: false
+        type: string
+        default: ''
+      aws_role_to_assume:
+        description: AWS IAM role ARN used for Amazon ECR authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
+      azure_client_id:
+        description: Azure client ID used for Azure Container Registry authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
+      azure_subscription_id:
+        description: Azure subscription ID used for Azure Container Registry authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
+      azure_tenant_id:
+        description: Azure tenant ID used for Azure Container Registry authentication via GitHub OIDC.
+        required: false
+        type: string
+        default: ''
       fail_on_findings:
         description: Fail when vulnerabilities are discovered.
         required: false
         type: boolean
         default: true
+      gcp_service_account:
+        description: Google service account email used for Google Artifact Registry authentication via workload identity federation.
+        required: false
+        type: string
+        default: ''
+      gcp_workload_identity_provider:
+        description: Google workload identity provider used for Google Artifact Registry authentication.
+        required: false
+        type: string
+        default: ''
       ignore_unfixed:
         description: Ignore unfixed vulnerabilities reported by the upstream workflow.
         required: false
         type: boolean
         default: true
+      registry_provider:
+        description: Container registry provider. Supported values are auto, ghcr, acr, ecr, or gar.
+        required: false
+        type: string
+        default: auto
+      registry_server:
+        description: Container registry host. When omitted, the host is inferred from the image reference.
+        required: false
+        type: string
+        default: ''
       scan_target:
         description: Filesystem path or image reference to scan.
         required: false
@@ -41,19 +86,23 @@ on:
         description: Overall workflow result from the upstream workflow.
         value: ${{ jobs.upstream.outputs.result }}
 
-permissions:
-  contents: read
-
 jobs:
   upstream:
-    permissions:
-      contents: read
-      packages: read
+    name: "SecOps Org - Container Scan"
     uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
+      aws_region: ${{ inputs.aws_region }}
+      aws_role_to_assume: ${{ inputs.aws_role_to_assume }}
+      azure_client_id: ${{ inputs.azure_client_id }}
+      azure_subscription_id: ${{ inputs.azure_subscription_id }}
+      azure_tenant_id: ${{ inputs.azure_tenant_id }}
       fail_on_findings: ${{ inputs.fail_on_findings }}
+      gcp_service_account: ${{ inputs.gcp_service_account }}
+      gcp_workload_identity_provider: ${{ inputs.gcp_workload_identity_provider }}
       ignore_unfixed: ${{ inputs.ignore_unfixed }}
+      registry_provider: ${{ inputs.registry_provider }}
+      registry_server: ${{ inputs.registry_server }}
       scan_target: ${{ inputs.scan_target }}
       scan_type: ${{ inputs.scan_type }}
       severity: ${{ inputs.severity }}

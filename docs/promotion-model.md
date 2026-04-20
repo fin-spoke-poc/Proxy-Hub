@@ -8,11 +8,19 @@ Proxy-Hub does not own the security logic. It owns the project-local attachment 
 
 ## Promotion Flow
 
-1. SecOps publishes a reviewed release such as `v1.0.0` and maintains the floating major tag such as `v1`.
-2. Proxy-Hub updates the pinned upstream repo and workflow references in the proxy workflows and `manifests/workflow-map.yaml`.
+1. During bootstrap, Proxy-Hub can track `@main` from SecOps while there are no released `v1` tags yet.
+2. Once SecOps publishes a reviewed release such as `v1.0.0` and maintains the floating major tag such as `v1`, update the proxy workflows and `manifests/workflow-map.yaml` from `main` to the approved floating major tag.
 3. `validate-proxy-workflows.yml` must pass before merge to `main`.
 4. After merge, `release.yml` creates a new immutable Proxy-Hub tag such as `v1.0.0` and refreshes the floating major tag such as `v1`.
 5. GitHub Org Rulesets continue pointing to the Proxy-Hub major tag, not `main`.
+
+## Bootstrap State
+
+This repository is currently in bootstrap mode until the first governed SecOps and Proxy-Hub releases exist.
+
+- Proxy workflow `uses:` references may point to `@main`.
+- `manifests/workflow-map.yaml` records `proxy_ref: main` and `upstream_ref: main` so validation reflects reality.
+- After the first SecOps release, switch both refs to `v1`, validate, and then publish the first Proxy-Hub release.
 
 ## Activation Checklist
 

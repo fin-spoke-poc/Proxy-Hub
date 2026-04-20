@@ -61,9 +61,11 @@ jobs:
           exit 1
         fi
 
-        echo "major_tag=$major_tag" >> "$GITHUB_OUTPUT"
-        echo "target_sha=$target_sha" >> "$GITHUB_OUTPUT"
-        echo "version=$version" >> "$GITHUB_OUTPUT"
+        {
+          echo "major_tag=$major_tag"
+          echo "target_sha=$target_sha"
+          echo "version=$version"
+        } >> "$GITHUB_OUTPUT"
 
     - name: Create immutable release tag
       shell: bash
