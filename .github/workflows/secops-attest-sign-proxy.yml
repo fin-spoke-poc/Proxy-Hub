@@ -96,6 +96,7 @@ permissions:
 
 jobs:
   upstream:
+    name: "SecOps Org - Attest/Sign"
     permissions:
       artifact-metadata: write
       attestations: write
