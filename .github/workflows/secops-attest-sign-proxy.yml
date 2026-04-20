@@ -88,6 +88,7 @@ on:
         value: ${{ jobs.upstream.outputs.signature_result }}
 
 permissions:
+  artifact-metadata: write
   attestations: write
   contents: read
   id-token: write
@@ -96,6 +97,7 @@ permissions:
 jobs:
   upstream:
     permissions:
+      artifact-metadata: write
       attestations: write
       contents: read
       id-token: write
