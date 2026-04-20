@@ -89,7 +89,7 @@ on:
 jobs:
   upstream:
     name: "SecOps Org - Container Scan"
-    uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@feat/multi-attest-targets
+    uses: fin-hub-poc/SecOps/.github/workflows/container-scan.yml@main
     with:
       artifact_name: ${{ inputs.artifact_name }}
       aws_region: ${{ inputs.aws_region }}
