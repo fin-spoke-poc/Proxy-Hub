@@ -23,7 +23,7 @@ jobs:
       uses: raven-actions/actionlint@v2
 
   validate_proxy_contracts:
-    name: "Validate Proxy Workflow Contracts"
+    name: "Validate Proxy Workflow"
     runs-on: ubuntu-latest
 
     steps:
